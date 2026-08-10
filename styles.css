@@ -154,21 +154,58 @@ h2 {
   flex: 1;
 }
 
-/* Calendário */
-.calendar-container {
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius);
-  padding: 16px;
-  background-color: #ffffff;
-  margin-bottom: 16px;
+/* Seleção de Horários e Cards de Viagem */
+.time-slots-container {
+  margin-bottom: 20px;
 }
 
-.calendar-header {
+.section-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--text-main);
+}
+
+.time-slots {
+  display: flex;
+  gap: 8px;
+}
+
+.time-slot-btn {
+  flex: 1;
+  padding: 10px 6px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid var(--border-color);
+  background-color: var(--gray-light);
+  color: var(--text-main);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.time-slot-btn:hover {
+  border-color: var(--border-hover);
+}
+
+.time-slot-btn.active {
+  background-color: var(--button-bg);
+  color: #ffffff;
+  border-color: var(--button-bg);
+}
+
+/* Seletor de Mês */
+.month-selector {
   display: flex;
   justify-content: space-between;
   align-items: center;
   font-weight: 600;
   font-size: 14px;
+  padding: 10px 14px;
+  background-color: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
   margin-bottom: 12px;
 }
 
@@ -181,54 +218,160 @@ h2 {
   font-weight: bold;
 }
 
-.btn-cal-nav:hover {
-  background-color: var(--gray-medium);
+.btn-cal-nav:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  background-color: var(--disabled-bg);
 }
 
-.calendar-weekdays {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  text-align: center;
+/* Scroll e Lista de Cards de Viagem */
+.trip-cards-scroll {
+  max-height: 290px;
+  overflow-y: auto;
+  padding-right: 4px;
+  margin-bottom: 16px;
+}
+
+.trip-cards-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+
+.trip-cards-scroll::-webkit-scrollbar-track {
+  background: var(--gray-light);
+  border-radius: 4px;
+}
+
+.trip-cards-scroll::-webkit-scrollbar-thumb {
+  background: var(--gray-medium);
+  border-radius: 4px;
+}
+
+.trip-cards-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Card de Viagem (Inspirado no design enviado) */
+.trip-card {
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 16px;
+  background-color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.trip-card:hover {
+  border-color: var(--border-hover);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.trip-card.selected {
+  border-color: var(--button-bg);
+  background-color: var(--gray-light);
+  box-shadow: 0 0 0 1px var(--button-bg);
+}
+
+.trip-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.trip-time-box {
+  display: flex;
+  flex-direction: column;
+}
+
+.trip-time-box.text-right {
+  text-align: right;
+}
+
+.departure-time, .arrival-time {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.location-name {
   font-size: 12px;
-  font-weight: 600;
   color: var(--text-muted);
-  margin-bottom: 8px;
+  margin-top: 2px;
 }
 
-.calendar-days {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
+/* Linha visual de trajeto (Manaus -> Rio Amazonas) */
+.trip-route-line {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  margin: 0 12px;
 }
 
-.cal-day {
-  aspect-ratio: 1;
+.route-line-bar {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  position: relative;
+}
+
+.route-point {
+  width: 6px;
+  height: 6px;
+  background-color: var(--button-bg);
+  border-radius: 50%;
+}
+
+.route-dashed-line {
+  flex: 1;
+  height: 1px;
+  border-top: 1px dashed var(--gray-medium);
+  margin: 0 4px;
+}
+
+.route-badge-icon {
+  width: 26px;
+  height: 26px;
+  background-color: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 12px;
+}
+
+.route-duration {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.trip-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-color);
+}
+
+.trip-date-badge {
   font-size: 13px;
-  border-radius: 4px;
-  border: 1px solid transparent;
-  background-color: var(--gray-light);
-  cursor: pointer;
-  transition: all 0.15s ease;
+  font-weight: 600;
+  color: var(--text-main);
 }
 
-.cal-day.disabled {
-  background-color: transparent;
-  color: var(--disabled-text);
-  cursor: not-allowed;
-  text-decoration: line-through;
-}
-
-.cal-day:not(.disabled):hover {
-  border-color: var(--button-bg);
-}
-
-.cal-day.selected {
-  background-color: var(--button-bg);
-  color: #ffffff;
-  font-weight: bold;
+.status-badge {
+  font-size: 11px;
+  font-weight: 500;
+  background-color: #ffffff;
+  border: 1px solid var(--border-color);
+  padding: 3px 8px;
+  border-radius: 12px;
+  color: var(--text-muted);
 }
 
 .selected-date-info {
@@ -241,66 +384,14 @@ h2 {
   text-align: center;
 }
 
-/* Ingressos Grid */
-.tickets-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-bottom: 24px;
-}
-
-@media (max-width: 500px) {
-  .tickets-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.ticket-card {
-  border: 2px solid var(--border-color);
-  border-radius: var(--radius);
-  padding: 16px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  background-color: #ffffff;
-}
-
-.ticket-card:hover {
-  border-color: var(--border-hover);
-}
-
-.ticket-card.selected {
-  border-color: var(--button-bg);
-  background-color: var(--gray-light);
-}
-
-.ticket-card h3 {
-  font-size: 16px;
-  margin-bottom: 6px;
-}
-
-.ticket-price {
-  font-size: 20px;
+.trip-price-tag {
+  font-size: 14px;
   font-weight: 700;
-  margin-bottom: 12px;
-}
-
-.ticket-features {
-  list-style: none;
-  font-size: 12px;
-  color: var(--text-muted);
-}
-
-.ticket-features li {
-  margin-bottom: 6px;
-  padding-left: 14px;
-  position: relative;
-}
-
-.ticket-features li::before {
-  content: "•";
-  position: absolute;
-  left: 0;
   color: var(--text-main);
+  background-color: #ffffff;
+  border: 1px solid var(--border-color);
+  padding: 4px 10px;
+  border-radius: 6px;
 }
 
 /* Pagamento */

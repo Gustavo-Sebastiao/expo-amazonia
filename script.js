@@ -4,6 +4,7 @@ const bookingState = {
   email: '',
   cpf: '',
   date: null,
+  selectedTime: '10h00',
   ticketType: '',
   ticketPrice: 0,
   paymentMethod: 'card'
@@ -15,7 +16,6 @@ let currentCalendarDate = new Date();
 document.addEventListener('DOMContentLoaded', () => {
   initStep1Validation();
   initCalendar();
-  initTickets();
   initPayment();
   initNavigation();
 });
@@ -40,11 +40,11 @@ function goToStep(stepNumber) {
     }
   });
 
-  if (stepNumber === 4) {
+  if (stepNumber === 3) {
     updateSummary();
   }
 
-  if (stepNumber === 5) {
+  if (stepNumber === 4) {
     renderReceipt();
   }
 }
@@ -58,27 +58,22 @@ function initNavigation() {
     });
   });
 
-  // Botão Avançar Passo 1
+  // Botão Avançar Passo 1 -> Passo 2 (Data e Horário)
   document.getElementById('btn-step-1-next').addEventListener('click', () => {
     goToStep(2);
   });
 
-  // Botão Avançar Passo 2
+  // Botão Avançar Passo 2 -> Passo 3 (Pagamento)
   document.getElementById('btn-step-2-next').addEventListener('click', () => {
     goToStep(3);
   });
 
-  // Botão Avançar Passo 3
-  document.getElementById('btn-step-3-next').addEventListener('click', () => {
+  // Botão Finalizar Pagamento (Passo 3) -> Passo 4 (Confirmação)
+  document.getElementById('btn-step-3-finish').addEventListener('click', () => {
     goToStep(4);
   });
 
-  // Botão Finalizar Pagamento (Passo 4)
-  document.getElementById('btn-step-4-finish').addEventListener('click', () => {
-    goToStep(5);
-  });
-
-  // Botão Voltar ao Início (Passo 5)
+  // Botão Voltar ao Início (Passo 4)
   document.getElementById('btn-restart').addEventListener('click', () => {
     resetAll();
     goToStep(1);
@@ -131,33 +126,87 @@ function initStep1Validation() {
   emailInput.addEventListener('input', checkForm);
 }
 
-// PASSO 2: CALENDÁRIO COM BLOQUEIO DE DATAS PASSADAS
+// PASSO 2: AGENDAMENTO POR HORÁRIO E LISTAGEM DE CARDS DE VIAGEM
 function initCalendar() {
   const calPrev = document.getElementById('cal-prev');
   const calNext = document.getElementById('cal-next');
 
+  // Seleção dos Botões de Horário no Topo
+  const timeButtons = document.querySelectorAll('.time-slot-btn');
+  timeButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      timeButtons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      bookingState.selectedTime = btn.getAttribute('data-time');
+      renderTripCards();
+    });
+  });
+
   calPrev.addEventListener('click', () => {
-    currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
-    renderCalendar();
+    if (!calPrev.disabled) {
+      currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
+      renderTripCards();
+    }
   });
 
   calNext.addEventListener('click', () => {
     currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
-    renderCalendar();
+    renderTripCards();
   });
 
-  renderCalendar();
+  renderTripCards();
 }
 
-function renderCalendar() {
+// Função auxiliar para calcular término da viagem (exatamente 1h 30m após o início)
+function calculateArrivalTime(departureTime) {
+  const timesMap = {
+    '10h00': '11h30',
+    '12h00': '13h30',
+    '14h00': '15h30',
+    '16h00': '17h30'
+  };
+
+  if (timesMap[departureTime]) {
+    return timesMap[departureTime];
+  }
+
+  let match = departureTime ? departureTime.match(/(\d+)[h:](\d+)/i) : null;
+  if (!match) return '11h30';
+
+  let hours = parseInt(match[1], 10);
+  let minutes = parseInt(match[2], 10);
+
+  let totalMinutes = hours * 60 + minutes + 90;
+  let newHours = Math.floor(totalMinutes / 60) % 24;
+  let newMinutes = totalMinutes % 60;
+
+  let strHours = newHours.toString().padStart(2, '0');
+  let strMinutes = newMinutes.toString().padStart(2, '0');
+
+  return `${strHours}h${strMinutes}`;
+}
+
+function renderTripCards() {
   const monthYearLabel = document.getElementById('cal-month-year');
-  const daysContainer = document.getElementById('calendar-days');
+  const cardsContainer = document.getElementById('trip-cards-container');
+  const calPrev = document.getElementById('cal-prev');
   const btnNext = document.getElementById('btn-step-2-next');
 
-  daysContainer.innerHTML = '';
+  cardsContainer.innerHTML = '';
 
   const year = currentCalendarDate.getFullYear();
   const month = currentCalendarDate.getMonth();
+
+  const now = new Date();
+  const currentRealYear = now.getFullYear();
+  const currentRealMonth = now.getMonth();
+
+  // Desabilita a seta de voltar quando estiver no mês atual ou anterior
+  if (year < currentRealYear || (year === currentRealYear && month <= currentRealMonth)) {
+    calPrev.disabled = true;
+  } else {
+    calPrev.disabled = false;
+  }
 
   const monthNames = [
     'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
@@ -166,80 +215,96 @@ function renderCalendar() {
 
   monthYearLabel.textContent = `${monthNames[month]} ${year}`;
 
-  const firstDayIndex = new Date(year, month, 1).getDay();
   const totalDays = new Date(year, month + 1, 0).getDate();
-
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  // Preenche dias em branco no início
-  for (let i = 0; i < firstDayIndex; i++) {
-    const emptyCell = document.createElement('div');
-    emptyCell.classList.add('cal-day', 'disabled');
-    daysContainer.appendChild(emptyCell);
-  }
+  const currentDeparture = bookingState.selectedTime || '10h00';
+  const currentArrival = calculateArrivalTime(currentDeparture);
+  const dayNames = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
 
-  // Preenche os dias do mês
+  let countAvailable = 0;
+
   for (let day = 1; day <= totalDays; day++) {
-    const dayCell = document.createElement('div');
-    dayCell.classList.add('cal-day');
-    dayCell.textContent = day;
-
     const cellDate = new Date(year, month, day);
     cellDate.setHours(0, 0, 0, 0);
 
-    // Bloqueia dias anteriores ao dia de hoje
-    if (cellDate < today) {
-      dayCell.classList.add('disabled');
-    } else {
-      // Verifica se é o dia selecionado atualmente
+    const dayOfWeek = cellDate.getDay(); // 0 = Dom, 3 = Qua, 5 = Sex, 6 = Sáb
+    const isAllowedDay = [0, 3, 5, 6].includes(dayOfWeek);
+
+    // Renderiza APENAS dias a partir de hoje que caem na Quarta, Sexta, Sábado ou Domingo
+    if (cellDate >= today && isAllowedDay) {
+      countAvailable++;
+      const card = document.createElement('div');
+      card.classList.add('trip-card');
+
+      // Preço: Quarta (3) e Sexta (5) -> R$ 150 | Sábado (6) e Domingo (0) -> R$ 180
+      const price = (dayOfWeek === 3 || dayOfWeek === 5) ? 150 : 180;
+
       if (bookingState.date && bookingState.date.getTime() === cellDate.getTime()) {
-        dayCell.classList.add('selected');
+        card.classList.add('selected');
       }
 
-      dayCell.addEventListener('click', () => {
-        document.querySelectorAll('.cal-day').forEach(d => d.classList.remove('selected'));
-        dayCell.classList.add('selected');
+      card.innerHTML = `
+        <div class="trip-card-header">
+          <div class="trip-time-box">
+            <span class="departure-time">${currentDeparture}</span>
+            <span class="location-name">Porto de Manaus</span>
+          </div>
+          <div class="trip-route-line">
+            <div class="route-line-bar">
+              <div class="route-point"></div>
+              <div class="route-dashed-line"></div>
+              <div class="route-badge-icon">🛥️</div>
+              <div class="route-dashed-line"></div>
+              <div class="route-point"></div>
+            </div>
+            <span class="route-duration">1h 30m • Direto</span>
+          </div>
+          <div class="trip-time-box text-right">
+            <span class="arrival-time">${currentArrival}</span>
+            <span class="location-name">Rio Amazonas</span>
+          </div>
+        </div>
+        <div class="trip-card-footer">
+          <div class="trip-date-badge">
+            ${dayNames[dayOfWeek]}, ${day} de ${monthNames[month]}
+          </div>
+          <div class="trip-price-tag">R$ ${price},00</div>
+        </div>
+      `;
+
+      card.addEventListener('click', () => {
+        document.querySelectorAll('.trip-card').forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
         bookingState.date = cellDate;
+        bookingState.ticketPrice = price;
+        bookingState.ticketType = 'Passeio Expo Amazônia';
 
         const dateFormatted = cellDate.toLocaleDateString('pt-BR', {
           weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'
         });
 
         document.getElementById('selected-date-info').innerHTML = 
-          `Data selecionada: <strong>${dateFormatted}</strong>`;
+          `Viagem selecionada: <strong>${dateFormatted} às ${bookingState.selectedTime}</strong> — <strong>R$ ${price},00</strong>`;
 
         btnNext.disabled = false;
       });
-    }
 
-    daysContainer.appendChild(dayCell);
+      cardsContainer.appendChild(card);
+    }
+  }
+
+  if (countAvailable === 0) {
+    cardsContainer.innerHTML = '<p style="text-align: center; font-size: 13px; color: #6e6e73; padding: 20px;">Nenhuma viagem disponível neste mês.</p>';
   }
 }
 
-// PASSO 3: SELEÇÃO DE INGRESSOS
-function initTickets() {
-  const ticketCards = document.querySelectorAll('.ticket-card');
-  const btnNext = document.getElementById('btn-step-3-next');
-
-  ticketCards.forEach(card => {
-    card.addEventListener('click', () => {
-      ticketCards.forEach(c => c.classList.remove('selected'));
-      card.classList.add('selected');
-
-      bookingState.ticketType = card.getAttribute('data-ticket') === 'premium' ? 'Ingresso Premium' : 'Ingresso Normal';
-      bookingState.ticketPrice = parseFloat(card.getAttribute('data-price'));
-
-      btnNext.disabled = false;
-    });
-  });
-}
-
-// PASSO 4: FORMA DE PAGAMENTO E RESUMO
+// PASSO 3: FORMA DE PAGAMENTO E RESUMO
 function initPayment() {
   const tabs = document.querySelectorAll('.payment-tab');
   const details = document.querySelectorAll('.payment-detail');
-  const btnFinish = document.getElementById('btn-step-4-finish');
+  const btnFinish = document.getElementById('btn-step-3-finish');
 
   const cardNumberInput = document.getElementById('card-number');
   const cardExpiryInput = document.getElementById('card-expiry');
@@ -306,22 +371,24 @@ function initPayment() {
 
 function updateSummary() {
   const summaryEl = document.getElementById('summary-text');
+  const timeStr = bookingState.selectedTime || '10h00';
   const dateStr = bookingState.date 
-    ? bookingState.date.toLocaleDateString('pt-BR') 
+    ? `${bookingState.date.toLocaleDateString('pt-BR')} às ${timeStr}` 
     : 'Não selecionada';
 
   summaryEl.innerHTML = `
     Cliente: <strong>${bookingState.name}</strong><br>
-    Data do Passeio: <strong>${dateStr}</strong><br>
+    Data da Viagem: <strong>${dateStr}</strong><br>
     Modalidade: <strong>${bookingState.ticketType}</strong> (R$ ${bookingState.ticketPrice.toFixed(2)})
   `;
 }
 
-// PASSO 5: RECIBO E CONFIRMAÇÃO
+// PASSO 4: RECIBO E CONFIRMAÇÃO
 function renderReceipt() {
   const receiptEl = document.getElementById('receipt-details');
+  const timeStr = bookingState.selectedTime || '10h00';
   const dateStr = bookingState.date 
-    ? bookingState.date.toLocaleDateString('pt-BR') 
+    ? `${bookingState.date.toLocaleDateString('pt-BR')} às ${timeStr}` 
     : 'Data confirmada';
 
   const methodNames = {
@@ -334,10 +401,9 @@ function renderReceipt() {
     <p><strong>Nome:</strong> ${bookingState.name}</p>
     <p><strong>CPF:</strong> ${bookingState.cpf}</p>
     <p><strong>E-mail:</strong> ${bookingState.email}</p>
-    <p><strong>Data da Viagem:</strong> ${dateStr}</p>
-    <p><strong>Tipo de Ingresso:</strong> ${bookingState.ticketType}</p>
-    <p><strong>Forma de Pagamento:</strong> ${methodNames[bookingState.paymentMethod] || 'Cartão'}</p>
+    <p><strong>Data e Horário:</strong> ${dateStr}</p>
     <p><strong>Valor Total:</strong> R$ ${bookingState.ticketPrice.toFixed(2)}</p>
+    <p><strong>Forma de Pagamento:</strong> ${methodNames[bookingState.paymentMethod] || 'Cartão'}</p>
     <p style="margin-top: 10px; font-size: 12px; color: #6e6e73;">Código da Reserva: #AMZ-${Math.floor(100000 + Math.random() * 900000)}</p>
   `;
 }
@@ -348,6 +414,7 @@ function resetAll() {
   bookingState.email = '';
   bookingState.cpf = '';
   bookingState.date = null;
+  bookingState.selectedTime = '10h00';
   bookingState.ticketType = '';
   bookingState.ticketPrice = 0;
   bookingState.paymentMethod = 'card';
@@ -359,12 +426,14 @@ function resetAll() {
   document.getElementById('card-expiry').value = '';
   document.getElementById('card-cvv').value = '';
 
+  // Reseta seleção de horários
+  const timeButtons = document.querySelectorAll('.time-slot-btn');
+  timeButtons.forEach(b => b.classList.remove('active'));
+  if (timeButtons[0]) timeButtons[0].classList.add('active');
+
   document.getElementById('selected-date-info').textContent = 'Nenhuma data selecionada.';
   document.getElementById('btn-step-2-next').disabled = true;
 
-  document.querySelectorAll('.ticket-card').forEach(c => c.classList.remove('selected'));
-  document.getElementById('btn-step-3-next').disabled = true;
-
   currentCalendarDate = new Date();
-  renderCalendar();
+  renderTripCards();
 }
