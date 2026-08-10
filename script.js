@@ -92,15 +92,35 @@ function initStep1Validation() {
   const cpfInput = document.getElementById('cpf');
   const btnNext = document.getElementById('btn-step-1-next');
 
+  // Máscara e restrição estrita de 11 números para o CPF
+  cpfInput.addEventListener('input', (e) => {
+    let digits = e.target.value.replace(/\D/g, '').slice(0, 11);
+    
+    let formatted = digits;
+    if (digits.length > 9) {
+      formatted = `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
+    } else if (digits.length > 6) {
+      formatted = `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`;
+    } else if (digits.length > 3) {
+      formatted = `${digits.slice(0, 3)}.${digits.slice(3)}`;
+    }
+    
+    e.target.value = formatted;
+    checkForm();
+  });
+
   function checkForm() {
     const nameVal = nameInput.value.trim();
     const emailVal = emailInput.value.trim();
-    const cpfVal = cpfInput.value.trim();
+    const cpfDigits = cpfInput.value.replace(/\D/g, '');
 
-    if (nameVal !== '' && emailVal !== '' && cpfVal !== '') {
+    // O CPF deve conter exatamente 11 dígitos
+    const isCpfValid = cpfDigits.length === 11;
+
+    if (nameVal !== '' && emailVal !== '' && isCpfValid) {
       bookingState.name = nameVal;
       bookingState.email = emailVal;
-      bookingState.cpf = cpfVal;
+      bookingState.cpf = cpfInput.value;
       btnNext.disabled = false;
     } else {
       btnNext.disabled = true;
@@ -109,7 +129,6 @@ function initStep1Validation() {
 
   nameInput.addEventListener('input', checkForm);
   emailInput.addEventListener('input', checkForm);
-  cpfInput.addEventListener('input', checkForm);
 }
 
 // PASSO 2: CALENDÁRIO COM BLOQUEIO DE DATAS PASSADAS
@@ -220,6 +239,52 @@ function initTickets() {
 function initPayment() {
   const tabs = document.querySelectorAll('.payment-tab');
   const details = document.querySelectorAll('.payment-detail');
+  const btnFinish = document.getElementById('btn-step-4-finish');
+
+  const cardNumberInput = document.getElementById('card-number');
+  const cardExpiryInput = document.getElementById('card-expiry');
+  const cardCvvInput = document.getElementById('card-cvv');
+
+  // Validação dos dados do cartão
+  function validatePayment() {
+    if (bookingState.paymentMethod === 'card') {
+      const cardDigits = cardNumberInput.value.replace(/\D/g, '');
+      const expiryDigits = cardExpiryInput.value.replace(/\D/g, '');
+      const cvvDigits = cardCvvInput.value.replace(/\D/g, '');
+
+      // Cartão: 16 números exatos | Validade: 4 números exatos | CVV: 3 números exatos
+      const isCardValid = (cardDigits.length === 16) && (expiryDigits.length === 4) && (cvvDigits.length === 3);
+      btnFinish.disabled = !isCardValid;
+    } else {
+      btnFinish.disabled = false;
+    }
+  }
+
+  // Restrição e formatação do Número do Cartão (16 números)
+  cardNumberInput.addEventListener('input', (e) => {
+    let digits = e.target.value.replace(/\D/g, '').slice(0, 16);
+    let formatted = digits.match(/.{1,4}/g)?.join(' ') || digits;
+    e.target.value = formatted;
+    validatePayment();
+  });
+
+  // Restrição e formatação da Validade (4 números, adiciona / após 2 números)
+  cardExpiryInput.addEventListener('input', (e) => {
+    let digits = e.target.value.replace(/\D/g, '').slice(0, 4);
+    let formatted = digits;
+    if (digits.length >= 2) {
+      formatted = `${digits.slice(0, 2)}/${digits.slice(2)}`;
+    }
+    e.target.value = formatted;
+    validatePayment();
+  });
+
+  // Restrição do CVV (3 números)
+  cardCvvInput.addEventListener('input', (e) => {
+    let digits = e.target.value.replace(/\D/g, '').slice(0, 3);
+    e.target.value = digits;
+    validatePayment();
+  });
 
   tabs.forEach(tab => {
     tab.addEventListener('click', () => {
@@ -231,8 +296,12 @@ function initPayment() {
       bookingState.paymentMethod = method;
 
       document.getElementById(`payment-${method}`).classList.add('active');
+      validatePayment();
     });
   });
+
+  // Estado inicial ao carregar o passo
+  validatePayment();
 }
 
 function updateSummary() {
@@ -285,6 +354,10 @@ function resetAll() {
 
   document.getElementById('form-user-data').reset();
   document.getElementById('btn-step-1-next').disabled = true;
+
+  document.getElementById('card-number').value = '';
+  document.getElementById('card-expiry').value = '';
+  document.getElementById('card-cvv').value = '';
 
   document.getElementById('selected-date-info').textContent = 'Nenhuma data selecionada.';
   document.getElementById('btn-step-2-next').disabled = true;
