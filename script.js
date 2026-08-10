@@ -7,11 +7,25 @@ const bookingState = {
   selectedTime: '10h00',
   ticketType: '',
   ticketPrice: 0,
-  paymentMethod: 'card'
+  paymentMethod: 'card',
+  codigoReserva: ''
 };
 
 // Data atual para controle do calendário
 let currentCalendarDate = new Date();
+
+// Inicialização do cliente Supabase (utilizando a chave pública moderna sb_publishable_...)
+const SUPABASE_URL = (window.ENV && window.ENV.SUPABASE_URL) || '';
+const SUPABASE_PUBLISHABLE_KEY = (window.ENV && window.ENV.SUPABASE_PUBLISHABLE_KEY) || '';
+
+let supabaseClient = null;
+if (typeof supabase !== 'undefined' && SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY && !SUPABASE_URL.includes('seu-projeto')) {
+  try {
+    supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+  } catch (e) {
+    console.warn('Configuração do Supabase pendente:', e.message);
+  }
+}
 
 document.addEventListener('DOMContentLoaded', () => {
   initStep1Validation();
@@ -68,8 +82,43 @@ function initNavigation() {
     goToStep(3);
   });
 
-  // Botão Finalizar Pagamento (Passo 3) -> Passo 4 (Confirmação)
-  document.getElementById('btn-step-3-finish').addEventListener('click', () => {
+  // Botão Finalizar Pagamento (Passo 3) -> Persiste no Supabase -> Passo 4 (Confirmação)
+  const finishBtn = document.getElementById('btn-step-3-finish');
+  finishBtn.addEventListener('click', async () => {
+    finishBtn.disabled = true;
+    finishBtn.textContent = 'Processando reserva...';
+
+    // Gerar código único de reserva
+    const codigoReserva = '#AMZ-' + Math.floor(100000 + Math.random() * 900000);
+    bookingState.codigoReserva = codigoReserva;
+
+    // Tentar persistir no banco Supabase se configurado
+    if (supabaseClient && bookingState.date) {
+      try {
+        const isoDate = bookingState.date.toISOString().split('T')[0];
+        const { error } = await supabaseClient.from('reservas').insert([{
+          codigo_reserva: codigoReserva,
+          nome: bookingState.name,
+          email: bookingState.email,
+          cpf: bookingState.cpf,
+          data_viagem: isoDate,
+          horario_saida: bookingState.selectedTime,
+          horario_chegada: calculateArrivalTime(bookingState.selectedTime),
+          valor_total: bookingState.ticketPrice,
+          forma_pagamento: bookingState.paymentMethod,
+          status_pagamento: 'confirmado'
+        }]);
+
+        if (error) {
+          console.warn('Aviso ao salvar no Supabase:', error.message);
+        }
+      } catch (err) {
+        console.warn('Erro ao conectar ao Supabase:', err);
+      }
+    }
+
+    finishBtn.textContent = 'Finalizar Pagamento';
+    finishBtn.disabled = false;
     goToStep(4);
   });
 
@@ -397,6 +446,8 @@ function renderReceipt() {
     boleto: 'Boleto Bancário'
   };
 
+  const codigo = bookingState.codigoReserva || ('#AMZ-' + Math.floor(100000 + Math.random() * 900000));
+
   receiptEl.innerHTML = `
     <p><strong>Nome:</strong> ${bookingState.name}</p>
     <p><strong>CPF:</strong> ${bookingState.cpf}</p>
@@ -404,7 +455,7 @@ function renderReceipt() {
     <p><strong>Data e Horário:</strong> ${dateStr}</p>
     <p><strong>Valor Total:</strong> R$ ${bookingState.ticketPrice.toFixed(2)}</p>
     <p><strong>Forma de Pagamento:</strong> ${methodNames[bookingState.paymentMethod] || 'Cartão'}</p>
-    <p style="margin-top: 10px; font-size: 12px; color: #6e6e73;">Código da Reserva: #AMZ-${Math.floor(100000 + Math.random() * 900000)}</p>
+    <p style="margin-top: 10px; font-size: 12px; color: #6e6e73;">Código da Reserva: <strong>${codigo}</strong></p>
   `;
 }
 
@@ -418,6 +469,7 @@ function resetAll() {
   bookingState.ticketType = '';
   bookingState.ticketPrice = 0;
   bookingState.paymentMethod = 'card';
+  bookingState.codigoReserva = '';
 
   document.getElementById('form-user-data').reset();
   document.getElementById('btn-step-1-next').disabled = true;
