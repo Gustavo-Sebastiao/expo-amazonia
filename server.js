@@ -1,22 +1,47 @@
+import dotenv from 'dotenv';
+import fs from 'fs';
+import path from 'path';
 import express from 'express';
 import { createClient } from '@supabase/supabase-js';
 import { v4 as uuidv4 } from 'uuid';
 import { enviarIngressoPorEmail } from './emailService.js';
 
+// Carrega variáveis do arquivo .env.local se existir, senão carrega do .env
+if (fs.existsSync('.env.local')) {
+  dotenv.config({ path: '.env.local' });
+} else {
+  dotenv.config();
+}
+
 const app = express();
 app.use(express.json());
+
+// Servir arquivos estáticos do site (index.html, styles.css, script.js)
+app.use(express.static(path.resolve('.')));
+
+// Habilita CORS básico para requisições do navegador
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  next();
+});
 
 // Configuração do Supabase Administrativo no Servidor
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SECRET_KEY = process.env.SUPABASE_SECRET_KEY; // Chave sb_secret_...
 
-if (!SUPABASE_URL || !SUPABASE_SECRET_KEY) {
-  console.error('ERRO: SUPABASE_URL e SUPABASE_SECRET_KEY devem estar configurados nas variáveis de ambiente.');
+let supabaseAdmin = null;
+if (SUPABASE_URL && SUPABASE_SECRET_KEY && !SUPABASE_URL.includes('seu-projeto')) {
+  try {
+    supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SECRET_KEY, {
+      auth: { persistSession: false, autoRefreshToken: false }
+    });
+  } catch (e) {
+    console.warn('⚠️ Erro ao inicializar cliente Supabase:', e.message);
+  }
+} else {
+  console.warn('⚠️ AVISO: SUPABASE_URL ou SUPABASE_SECRET_KEY ainda não preenchidos. O servidor rodará em modo local para testes de e-mail.');
 }
-
-const supabaseAdmin = createClient(SUPABASE_URL || '', SUPABASE_SECRET_KEY || '', {
-  auth: { persistSession: false, autoRefreshToken: false }
-});
 
 /**
  * ------------------------------------------------------------------
@@ -32,6 +57,13 @@ app.post('/api/ingressos/validar', async (req, res) => {
       return res.status(400).json({
         sucesso: false,
         mensagem: 'O campo codigo_validacao é obrigatório.'
+      });
+    }
+
+    if (!supabaseAdmin) {
+      return res.status(503).json({
+        sucesso: false,
+        mensagem: 'Servidor Supabase não configurado no .env.local (SUPABASE_URL e SUPABASE_SECRET_KEY necessárias).'
       });
     }
 
