@@ -88,33 +88,79 @@ function initNavigation() {
     finishBtn.disabled = true;
     finishBtn.textContent = 'Processando reserva...';
 
-    // Gerar código único de reserva
+    // Gerar código único de reserva e UUID v4 de validação do QR Code
     const codigoReserva = '#AMZ-' + Math.floor(100000 + Math.random() * 900000);
-    bookingState.codigoReserva = codigoReserva;
+    const codigoValidacao = (typeof crypto !== 'undefined' && crypto.randomUUID) 
+      ? crypto.randomUUID() 
+      : 'f' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 
-    // Tentar persistir no banco Supabase se configurado
+    bookingState.codigoReserva = codigoReserva;
+    bookingState.codigoValidacao = codigoValidacao;
+
+    // Persistir reserva e ingresso no Supabase se configurado
     if (supabaseClient && bookingState.date) {
       try {
         const isoDate = bookingState.date.toISOString().split('T')[0];
-        const { error } = await supabaseClient.from('reservas').insert([{
-          codigo_reserva: codigoReserva,
-          nome: bookingState.name,
-          email: bookingState.email,
-          cpf: bookingState.cpf,
-          data_viagem: isoDate,
-          horario_saida: bookingState.selectedTime,
-          horario_chegada: calculateArrivalTime(bookingState.selectedTime),
-          valor_total: bookingState.ticketPrice,
-          forma_pagamento: bookingState.paymentMethod,
-          status_pagamento: 'confirmado'
-        }]);
+        
+        // 1. Salvar na tabela de reservas
+        const { data: reservaData, error: reservaError } = await supabaseClient
+          .from('reservas')
+          .insert([{
+            codigo_reserva: codigoReserva,
+            nome: bookingState.name,
+            email: bookingState.email,
+            cpf: bookingState.cpf,
+            data_viagem: isoDate,
+            horario_saida: bookingState.selectedTime,
+            horario_chegada: calculateArrivalTime(bookingState.selectedTime),
+            valor_total: bookingState.ticketPrice,
+            forma_pagamento: bookingState.paymentMethod,
+            status_pagamento: 'confirmado'
+          }])
+          .select('id')
+          .single();
 
-        if (error) {
-          console.warn('Aviso ao salvar no Supabase:', error.message);
+        if (reservaError) {
+          console.warn('Aviso ao salvar reserva no Supabase:', reservaError.message);
+        } else if (reservaData && reservaData.id) {
+          // 2. Salvar na tabela de ingressos para validação do fiscal
+          const { error: ingressoError } = await supabaseClient
+            .from('ingressos')
+            .insert([{
+              codigo_validacao: codigoValidacao,
+              usuario_id: reservaData.id,
+              evento_id: 'expo-amazonia-2026',
+              status: 'valido'
+            }]);
+
+          if (ingressoError) {
+            console.warn('Aviso ao salvar ingresso no Supabase:', ingressoError.message);
+          }
         }
       } catch (err) {
         console.warn('Erro ao conectar ao Supabase:', err);
       }
+    }
+
+    // 3. Disparar envio de e-mail real via servidor Node.js local (server.js) se estiver rodando
+    try {
+      fetch('http://localhost:3000/api/ingressos/enviar-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nome: bookingState.name,
+          email: bookingState.email,
+          cpf: bookingState.cpf,
+          dataViagem: bookingState.date ? bookingState.date.toLocaleDateString('pt-BR') : 'Data confirmada',
+          horarioSaida: bookingState.selectedTime,
+          valorTotal: bookingState.ticketPrice,
+          formaPagamento: bookingState.paymentMethod === 'card' ? 'Cartão de Débito/Crédito' : (bookingState.paymentMethod === 'pix' ? 'Pix' : 'Boleto Bancário'),
+          codigoReserva: codigoReserva,
+          codigoValidacao: codigoValidacao
+        })
+      }).catch(e => console.log('Servidor de e-mail local desativado ou indisponível:', e.message));
+    } catch (e) {
+      // Ignora silenciosamente se o servidor local não estiver rodando
     }
 
     finishBtn.textContent = 'Finalizar Pagamento';
@@ -447,6 +493,7 @@ function renderReceipt() {
   };
 
   const codigo = bookingState.codigoReserva || ('#AMZ-' + Math.floor(100000 + Math.random() * 900000));
+  const qrData = bookingState.codigoValidacao || 'ingresso-demo-validacao';
 
   receiptEl.innerHTML = `
     <p><strong>Nome:</strong> ${bookingState.name}</p>
@@ -455,7 +502,13 @@ function renderReceipt() {
     <p><strong>Data e Horário:</strong> ${dateStr}</p>
     <p><strong>Valor Total:</strong> R$ ${bookingState.ticketPrice.toFixed(2)}</p>
     <p><strong>Forma de Pagamento:</strong> ${methodNames[bookingState.paymentMethod] || 'Cartão'}</p>
-    <p style="margin-top: 10px; font-size: 12px; color: #6e6e73;">Código da Reserva: <strong>${codigo}</strong></p>
+    <p style="margin-top: 6px; font-size: 12px; color: #6e6e73;">Código da Reserva: <strong>${codigo}</strong></p>
+
+    <div style="text-align: center; margin-top: 16px; padding-top: 12px; border-top: 1px dashed #e5e5e7;">
+      <p style="font-size: 12px; font-weight: 600; margin-bottom: 8px;">QR Code do Ingresso (Apresente na Portaria):</p>
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(qrData)}" alt="QR Code Ingresso" style="border: 1px solid #e5e5e7; border-radius: 8px; padding: 4px; background: #ffffff;">
+      <p style="font-size: 11px; color: #6e6e73; font-family: monospace; margin-top: 4px;">Código de Validação: ${qrData.slice(0, 8)}...</p>
+    </div>
   `;
 }
 
