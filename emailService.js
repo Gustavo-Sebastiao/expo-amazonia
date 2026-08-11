@@ -1,20 +1,24 @@
 import nodemailer from 'nodemailer';
 import QRCode from 'qrcode';
+import { mascararCPF } from './securityUtils.js';
 
 /**
  * Configuração do Transportador de E-mail (Nodemailer)
  * Suporta SMTP do Gmail com Senha de App, Resend, SendGrid ou Amazon SES.
  * Defina as variáveis no seu .env.local ou ambiente de produção.
  */
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-  port: parseInt(process.env.EMAIL_PORT || '587', 10),
-  secure: process.env.EMAIL_SECURE === 'true', // true para porta 465, false para 587
-  auth: {
-    user: process.env.EMAIL_USER || 'seu-email@gmail.com',
-    pass: process.env.EMAIL_PASS || 'sua-senha-de-app-ou-api-key'
-  }
-});
+function getTransporter() {
+  return nodemailer.createTransport({
+    host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+    port: parseInt(process.env.EMAIL_PORT || '587', 10),
+    secure: process.env.EMAIL_SECURE === 'true', // true para porta 465, false para 587
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS
+    }
+  });
+}
+
 
 /**
  * Template HTML Email-Safe (Compatível com Gmail, Outlook e Apple Mail)
@@ -33,9 +37,12 @@ function gerarTemplateEmailHTML(dados) {
     codigoValidacao
   } = dados;
 
+  const cpfMascarado = mascararCPF(cpf);
+
   const valorFormatado = typeof valorTotal === 'number' 
     ? valorTotal.toFixed(2) 
     : valorTotal;
+
 
   const codigoTruncado = codigoValidacao 
     ? `${codigoValidacao.substring(0, 8)}...` 
@@ -88,7 +95,7 @@ function gerarTemplateEmailHTML(dados) {
                 <tr>
                   <td style="font-size: 13px; color: #1c1c1e; line-height: 1.7;">
                     <p style="margin: 0 0 6px 0;"><strong>Nome:</strong> ${nome}</p>
-                    <p style="margin: 0 0 6px 0;"><strong>CPF:</strong> ${cpf}</p>
+                    <p style="margin: 0 0 6px 0;"><strong>CPF:</strong> ${cpfMascarado}</p>
                     <p style="margin: 0 0 6px 0;"><strong>E-mail:</strong> ${email}</p>
                     <p style="margin: 0 0 6px 0;"><strong>Data e Horário:</strong> ${dataViagem} às ${horarioSaida}</p>
                     <p style="margin: 0 0 6px 0;"><strong>Valor Total:</strong> R$ ${valorFormatado}</p>
@@ -191,6 +198,7 @@ export async function enviarIngressoPorEmail(dadosCompra) {
       ]
     };
 
+    const transporter = getTransporter();
     const info = await transporter.sendMail(mailOptions);
     console.log(`[E-mail Enviado] Ingresso enviado com sucesso para ${email} (MessageID: ${info.messageId})`);
 
