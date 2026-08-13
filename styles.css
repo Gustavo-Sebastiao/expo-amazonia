@@ -537,21 +537,21 @@ h2 {
   overflow-x: hidden;
 }
 
-/* Header Transparente Flutuante */
+/* Header Transparente Flutuante com Fade (Degradê de Cima para Baixo) */
 .site-header {
   width: 100%;
   position: absolute;
   top: 0;
   left: 0;
   z-index: 10;
-  background: transparent;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.65) 0%, rgba(0, 0, 0, 0.25) 60%, rgba(0, 0, 0, 0) 100%);
   border-bottom: none;
 }
 
 .header-container {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 28px 48px;
+  padding: 32px 48px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -573,13 +573,14 @@ h2 {
 .nav-item {
   font-size: 15px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, 0.95);
   text-decoration: none;
   text-transform: uppercase;
   letter-spacing: 2px;
   padding-bottom: 6px;
   position: relative;
   transition: color 0.2s ease;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
 }
 
 .nav-item.active {
@@ -636,7 +637,7 @@ h2 {
 /* Título em Arte "Amazônia" - Camada de Trás (z-index 1) */
 .hero-title-img {
   position: absolute;
-  top: -12%;
+  top: -18%;
   left: 50%;
   transform: translateX(-50%);
   width: 115%;
