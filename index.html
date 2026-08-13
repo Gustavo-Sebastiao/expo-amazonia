@@ -34,7 +34,17 @@
   <main class="home-main">
     <section class="hero-section">
       <h1 class="sr-only">Expo Amazônia</h1>
-      <!-- Imagem do Título estilizado (Amazônia Igaratipo) atrás da arara com efeito de escrita -->
+      <!-- Filtro SVG para efeito ondular leve de rio -->
+      <svg width="0" height="0" style="position: absolute; width: 0; height: 0; overflow: hidden;" aria-hidden="true">
+        <filter id="riverWave">
+          <feTurbulence type="fractalNoise" baseFrequency="0.008 0.018" numOctaves="2" result="noise">
+            <animate attributeName="baseFrequency" dur="10s" values="0.008 0.018; 0.014 0.010; 0.008 0.018" repeatCount="indefinite"/>
+          </feTurbulence>
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" xChannelSelector="R" yChannelSelector="G"/>
+        </filter>
+      </svg>
+
+      <!-- Imagem do Título estilizado (Amazônia Igaratipo) atrás da arara com efeito de escrita e ondas -->
       <div class="hero-title-wrapper" id="heroTitleWrapper">
         <img src="assets/imagens/amazônia_igaratipo (2).png" alt="Amazônia" class="hero-title-img">
       </div>

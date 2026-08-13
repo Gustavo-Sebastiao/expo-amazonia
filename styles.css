@@ -634,7 +634,7 @@ h2 {
   overflow: hidden;
 }
 
-/* Título em Arte "Amazônia" - Camada de Trás (z-index 1) */
+/* Título em Arte "Amazônia" - Camada de Trás (z-index 1) com efeito de fluxo de rio */
 .hero-title-wrapper {
   position: absolute;
   top: -18%;
@@ -645,6 +645,7 @@ h2 {
   height: auto;
   z-index: 1;
   pointer-events: none;
+  animation: riverFlow 7s ease-in-out infinite alternate;
 }
 
 .hero-title-img {
@@ -652,7 +653,7 @@ h2 {
   height: auto;
   display: block;
   pointer-events: none;
-  filter: brightness(0) invert(1) drop-shadow(0 4px 12px rgba(0, 0, 0, 0.25));
+  filter: brightness(0) invert(1) drop-shadow(0 4px 12px rgba(0, 0, 0, 0.25)) url(#riverWave);
   clip-path: inset(0 100% 0 0);
   opacity: 1;
   animation: writeTitle 1.4s cubic-bezier(0.4, 0, 0.2, 1) 0.1s forwards;
@@ -664,6 +665,22 @@ h2 {
   }
   100% {
     clip-path: inset(0 0% 0 0);
+  }
+}
+
+/* Animação suave que simula o fluir sutil de um rio */
+@keyframes riverFlow {
+  0% {
+    transform: translateX(-50%) translateY(0px) rotate(0deg);
+  }
+  33% {
+    transform: translateX(-50%) translateY(-5px) rotate(0.3deg);
+  }
+  66% {
+    transform: translateX(-50%) translateY(3px) rotate(-0.2deg);
+  }
+  100% {
+    transform: translateX(-50%) translateY(-2px) rotate(0.1deg);
   }
 }
 
