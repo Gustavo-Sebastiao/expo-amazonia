@@ -32,7 +32,30 @@ document.addEventListener('DOMContentLoaded', () => {
   initCalendar();
   initPayment();
   initNavigation();
+  initTitleWritingEffect();
 });
+
+// Efeito de escrita no título "Amazônia" da Hero Section
+function initTitleWritingEffect() {
+  const heroWrapper = document.getElementById('heroTitleWrapper');
+  if (!heroWrapper) return;
+
+  const startAnimation = () => {
+    setTimeout(() => {
+      heroWrapper.classList.add('is-writing');
+    }, 150);
+  };
+
+  const img = heroWrapper.querySelector('.hero-title-img');
+  if (img && img.complete) {
+    startAnimation();
+  } else if (img) {
+    img.addEventListener('load', startAnimation);
+    setTimeout(startAnimation, 300);
+  } else {
+    startAnimation();
+  }
+}
 
 // NAVEGAÇÃO DE PASSOS
 function goToStep(stepNumber) {

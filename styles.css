@@ -635,7 +635,7 @@ h2 {
 }
 
 /* Título em Arte "Amazônia" - Camada de Trás (z-index 1) */
-.hero-title-img {
+.hero-title-wrapper {
   position: absolute;
   top: -18%;
   left: 50%;
@@ -645,7 +645,26 @@ h2 {
   height: auto;
   z-index: 1;
   pointer-events: none;
+}
+
+.hero-title-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  pointer-events: none;
   filter: brightness(0) invert(1) drop-shadow(0 4px 12px rgba(0, 0, 0, 0.25));
+  clip-path: inset(0 100% 0 0);
+  opacity: 1;
+  animation: writeTitle 1.4s cubic-bezier(0.4, 0, 0.2, 1) 0.1s forwards;
+}
+
+@keyframes writeTitle {
+  0% {
+    clip-path: inset(0 100% 0 0);
+  }
+  100% {
+    clip-path: inset(0 0% 0 0);
+  }
 }
 
 /* Arara Canindé - Camada da Frente (z-index 2) sobrepondo o título */
@@ -734,7 +753,7 @@ h2 {
   .header-center {
     gap: 36px;
   }
-  .hero-title-img {
+  .hero-title-wrapper {
     top: 20%;
     width: 92%;
   }
@@ -757,7 +776,7 @@ h2 {
   .header-icon {
     height: 34px;
   }
-  .hero-title-img {
+  .hero-title-wrapper {
     top: 22%;
     width: 96%;
   }
@@ -774,7 +793,7 @@ h2 {
     font-size: 11px;
     letter-spacing: 0.5px;
   }
-  .hero-title-img {
+  .hero-title-wrapper {
     top: 24%;
     width: 98%;
   }
