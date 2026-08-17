@@ -4,10 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Expo Amazônia - Início</title>
+  <link rel="icon" type="image/png" href="assets/imagens/amazonia_logo.png">
   <link rel="stylesheet" href="styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body class="home-page">
 
@@ -15,17 +16,27 @@
   <header class="site-header">
     <div class="header-container">
       
-      <div class="header-left"></div>
+      <!-- Canto Esquerdo: Logo da Marca (Branca) -->
+      <div class="header-left">
+        <a href="index.html" class="logo-link">
+          <img src="assets/imagens/amazonia_logo.png" alt="Expo Amazônia" class="header-logo-icon">
+        </a>
+      </div>
 
-      <!-- Menu no Meio -->
+      <!-- Menu no Meio (opcional/limpo) -->
       <nav class="header-center">
-        <a href="index.html" class="nav-item active">INÍCIO</a>
-        <a href="#conhecer" class="nav-item">CONHECER</a>
-        <a href="#agendar" class="nav-item">AGENDAR</a>
       </nav>
 
-      <!-- Canto Direito (Sem ícone por enquanto) -->
-      <div class="header-right"></div>
+      <!-- Canto Direito: Ícone de Menu Hambúrguer -->
+      <div class="header-right">
+        <button type="button" class="header-menu-btn" aria-label="Abrir Menu">
+          <svg width="28" height="20" viewBox="0 0 28 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <line x1="0" y1="2" x2="28" y2="2" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="6" y1="10" x2="28" y2="10" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="12" y1="18" x2="28" y2="18" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
 
     </div>
   </header>
@@ -33,23 +44,18 @@
   <!-- Conteúdo Principal do Início -->
   <main class="home-main">
     <section class="hero-section">
-      <h1 class="sr-only">Expo Amazônia</h1>
-      <!-- Filtro SVG para efeito ondular leve de rio -->
-      <svg width="0" height="0" style="position: absolute; width: 0; height: 0; overflow: hidden;" aria-hidden="true">
-        <filter id="riverWave">
-          <feTurbulence type="fractalNoise" baseFrequency="0.008 0.018" numOctaves="2" result="noise">
-            <animate attributeName="baseFrequency" dur="10s" values="0.008 0.018; 0.014 0.010; 0.008 0.018" repeatCount="indefinite"/>
-          </feTurbulence>
-          <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" xChannelSelector="R" yChannelSelector="G"/>
-        </filter>
-      </svg>
-
-      <!-- Imagem do Título estilizado (Amazônia Igaratipo) atrás da arara com efeito de escrita e ondas -->
-      <div class="hero-title-wrapper" id="heroTitleWrapper">
-        <img src="assets/imagens/amazônia_igaratipo (2).png" alt="Amazônia" class="hero-title-img">
+      <div class="hero-content">
+        <h1 class="hero-main-title">
+          A AMAZÔNIA<br>
+          COMO NUNCA<br>
+          VIU ANTES
+        </h1>
+        <p class="hero-subtitle">
+          olhe de perto uma das<br>
+          maiores florestas do mundo
+        </p>
+        <a href="ingresso.html" class="btn-hero-buy">comprar ingressos</a>
       </div>
-      <!-- Imagem da Arara sobreposta na frente -->
-      <img src="assets/imagens/arara.png" alt="Arara-canindé" class="hero-arara-img">
     </section>
 
     <!-- Seção Conhecer -->

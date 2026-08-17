@@ -537,80 +537,76 @@ h2 {
   overflow-x: hidden;
 }
 
-/* Header Transparente Flutuante com Fade (Degradê de Cima para Baixo) */
+/* Header Transparente Flutuante */
 .site-header {
   width: 100%;
   position: absolute;
   top: 0;
   left: 0;
   z-index: 10;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.65) 0%, rgba(0, 0, 0, 0.25) 60%, rgba(0, 0, 0, 0) 100%);
+  background: transparent;
   border-bottom: none;
 }
 
 .header-container {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 32px 48px;
+  padding: 36px 48px;
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
 .header-left {
-  flex: 1;
   display: flex;
   align-items: center;
 }
 
-/* Menu Centralizado */
+.logo-link {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+/* Ícone da marca no header - convertido para a cor branca */
+.header-logo-icon {
+  height: 72px;
+  width: auto;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.header-logo-icon:hover {
+  transform: scale(1.04);
+}
+
 .header-center {
   display: flex;
   align-items: center;
-  gap: 54px;
 }
 
-.nav-item {
-  font-size: 15px;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.95);
-  text-decoration: none;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  padding-bottom: 6px;
-  position: relative;
-  transition: color 0.2s ease;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
-}
-
-.nav-item.active {
-  color: #ffffff;
-  border-bottom: 3px solid #ffffff;
-}
-
-.nav-item:hover {
-  color: #ffffff;
-}
-
-/* Ícone no Canto Direito - Maior e Alinhado ao Centro */
 .header-right {
-  flex: 1;
   display: flex;
   align-items: center;
   justify-content: flex-end;
 }
 
-.header-icon {
-  height: 56px;
-  width: auto;
-  object-fit: contain;
-  display: block;
-  filter: brightness(0.2) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-  transition: transform 0.2s ease;
+/* Botão do Menu Hambúrguer */
+.header-menu-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
-.header-icon:hover {
-  transform: scale(1.08);
+.header-menu-btn:hover {
+  opacity: 0.8;
+  transform: scale(1.05);
 }
 
 /* Main Container da Home */
@@ -621,82 +617,71 @@ h2 {
   padding: 0;
 }
 
-/* Seção Hero com Imagem de Fundo e Camadas 3D */
+/* Seção Hero com Imagem de Fundo (amazonia_banner.jpg) */
 .hero-section {
   position: relative;
   width: 100%;
   height: 100vh;
   min-height: 650px;
-  background: url('assets/imagens/amazonia_florest.jpg') no-repeat center center / cover;
+  background: url('assets/imagens/amazonia_banner.jpg') no-repeat center center / cover;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  padding: 0 7%;
   overflow: hidden;
 }
 
-/* Título em Arte "Amazônia" - Camada de Trás (z-index 1) com efeito de fluxo de rio */
-.hero-title-wrapper {
-  position: absolute;
-  top: -18%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 115%;
-  max-width: none;
-  height: auto;
-  z-index: 1;
-  pointer-events: none;
-  animation: riverFlow 7s ease-in-out infinite alternate;
-}
-
-.hero-title-img {
-  width: 100%;
-  height: auto;
-  display: block;
-  pointer-events: none;
-  filter: brightness(0) invert(1) drop-shadow(0 4px 12px rgba(0, 0, 0, 0.25)) url(#riverWave);
-  clip-path: inset(0 100% 0 0);
-  opacity: 1;
-  animation: writeTitle 1.4s cubic-bezier(0.4, 0, 0.2, 1) 0.1s forwards;
-}
-
-@keyframes writeTitle {
-  0% {
-    clip-path: inset(0 100% 0 0);
-  }
-  100% {
-    clip-path: inset(0 0% 0 0);
-  }
-}
-
-/* Animação suave que simula o fluir sutil de um rio */
-@keyframes riverFlow {
-  0% {
-    transform: translateX(-50%) translateY(0px) rotate(0deg);
-  }
-  33% {
-    transform: translateX(-50%) translateY(-5px) rotate(0.3deg);
-  }
-  66% {
-    transform: translateX(-50%) translateY(3px) rotate(-0.2deg);
-  }
-  100% {
-    transform: translateX(-50%) translateY(-2px) rotate(0.1deg);
-  }
-}
-
-/* Arara Canindé - Camada da Frente (z-index 2) sobrepondo o título */
-.hero-arara-img {
-  position: absolute;
-  bottom: -2px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 60%;
-  max-width: 800px;
-  min-width: 340px;
-  height: auto;
+.hero-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  max-width: 620px;
   z-index: 2;
-  pointer-events: none;
-  object-fit: contain;
+  margin-top: 20px;
+}
+
+.hero-main-title {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: clamp(2.3rem, 4.8vw, 4.2rem);
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1.1;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+}
+
+.hero-subtitle {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: clamp(1rem, 1.8vw, 1.25rem);
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.95);
+  line-height: 1.45;
+  text-transform: lowercase;
+  margin-bottom: 32px;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.35);
+}
+
+.btn-hero-buy {
+  display: inline-block;
+  background-color: #ffffff;
+  color: #1c1c1e;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: lowercase;
+  text-decoration: none;
+  padding: 13px 30px;
+  border-radius: 50px;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.btn-hero-buy:hover {
+  transform: translateY(-2px);
+  background-color: #f4f4f4;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
 }
 
 /* Classe utilitária para acessibilidade */
@@ -765,57 +750,44 @@ h2 {
 /* Ajustes Responsivos */
 @media (max-width: 1024px) {
   .header-container {
-    padding: 24px 32px;
+    padding: 28px 36px;
   }
-  .header-center {
-    gap: 36px;
-  }
-  .hero-title-wrapper {
-    top: 20%;
-    width: 92%;
-  }
-  .hero-arara-img {
-    width: 72%;
+  .hero-section {
+    padding: 0 6%;
   }
 }
 
 @media (max-width: 768px) {
   .header-container {
-    padding: 20px 20px;
+    padding: 22px 24px;
   }
-  .header-center {
-    gap: 20px;
+  .header-logo-icon {
+    height: 54px;
   }
-  .nav-item {
-    font-size: 13px;
-    letter-spacing: 1px;
+  .hero-section {
+    padding: 0 6%;
   }
-  .header-icon {
-    height: 34px;
+  .hero-main-title {
+    margin-bottom: 16px;
   }
-  .hero-title-wrapper {
-    top: 22%;
-    width: 96%;
-  }
-  .hero-arara-img {
-    width: 85%;
+  .hero-subtitle {
+    margin-bottom: 24px;
   }
 }
 
 @media (max-width: 480px) {
-  .header-center {
-    gap: 14px;
+  .header-container {
+    padding: 18px 20px;
   }
-  .nav-item {
-    font-size: 11px;
-    letter-spacing: 0.5px;
+  .header-logo-icon {
+    height: 44px;
   }
-  .hero-title-wrapper {
-    top: 24%;
-    width: 98%;
+  .hero-section {
+    padding: 0 24px;
   }
-  .hero-arara-img {
-    width: 98%;
+  .btn-hero-buy {
+    padding: 11px 24px;
+    font-size: 13px;
   }
 }
 
