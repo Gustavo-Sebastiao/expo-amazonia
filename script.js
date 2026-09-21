@@ -28,11 +28,19 @@ if (typeof supabase !== 'undefined' && SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY 
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  initStep1Validation();
-  initCalendar();
-  initPayment();
-  initNavigation();
-  initTitleWritingEffect();
+  // Inicializações exclusivas da página de agendamento (ingresso.html)
+  if (document.body.classList.contains('body-ingresso') || document.getElementById('name')) {
+    initStep1Validation();
+    initCalendar();
+    initPayment();
+    initNavigation();
+  }
+
+  // Inicializações da página inicial (index.html)
+  if (document.body.classList.contains('home-page') || document.getElementById('heroStage')) {
+    initTitleWritingEffect();
+    initHeroCrossfade();
+  }
 });
 
 // Efeito de escrita no título "Amazônia" da Hero Section
@@ -55,6 +63,110 @@ function initTitleWritingEffect() {
   } else {
     startAnimation();
   }
+}
+
+// TRANSIÇÃO LEVE EM FADE NO SCROLL ENTRE SEÇÃO 1 (MUNDO) E SEÇÃO 2 (PLANETA)
+function initHeroCrossfade() {
+  const stage = document.getElementById('heroStage');
+  const mundo = document.getElementById('heroMundo');
+  const planeta = document.getElementById('heroPlaneta');
+  if (!stage || !mundo || !planeta) return;
+
+  let isWheelScrolling = false;
+
+  // Atualiza opacidade e profundidade continuamente com base na rolagem
+  function updateCrossfade() {
+    const rect = stage.getBoundingClientRect();
+    const windowHeight = window.innerHeight;
+
+    // progress varia de 0 (topo da Seção 1) a 1 (Seção 2 ativa)
+    const progress = Math.min(Math.max(-rect.top / windowHeight, 0), 1);
+
+    // Efeito suave de fade
+    mundo.style.opacity = (1 - progress).toFixed(3);
+    planeta.style.opacity = progress.toFixed(3);
+
+    // Habilita ponteiro apenas na seção com visibilidade predominante
+    mundo.style.pointerEvents = progress > 0.5 ? 'none' : 'auto';
+    planeta.style.pointerEvents = progress > 0.5 ? 'auto' : 'none';
+
+    // Efeito leve e sutil de escala para transição cinematográfica
+    mundo.style.transform = `scale(${(1 - progress * 0.03).toFixed(3)})`;
+    planeta.style.transform = `scale(${(0.97 + progress * 0.03).toFixed(3)})`;
+  }
+
+  window.addEventListener('scroll', updateCrossfade, { passive: true });
+  window.addEventListener('resize', updateCrossfade, { passive: true });
+  updateCrossfade(); // Aplica estado inicial imediatamente
+
+  // Assistência de rolagem suave com a roda do mouse / trackpad
+  window.addEventListener('wheel', (e) => {
+    if (isWheelScrolling) return;
+
+    const scrollY = window.scrollY || window.pageYOffset || 0;
+    const windowHeight = window.innerHeight;
+
+    // Se estiver na Seção 1 (topo) e rolar para baixo:
+    if (scrollY < 40 && e.deltaY > 15) {
+      e.preventDefault();
+      isWheelScrolling = true;
+      window.scrollTo({
+        top: windowHeight,
+        behavior: 'smooth'
+      });
+      setTimeout(() => { isWheelScrolling = false; }, 800);
+    }
+    // Se estiver na Seção 2 e rolar para cima:
+    else if (scrollY >= windowHeight - 40 && scrollY <= windowHeight + 40 && e.deltaY < -15) {
+      e.preventDefault();
+      isWheelScrolling = true;
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+      setTimeout(() => { isWheelScrolling = false; }, 800);
+    }
+  }, { passive: false });
+
+  // Suporte a gestos touch (swipe vertical) em celulares e tablets
+  let touchStartY = 0;
+  window.addEventListener('touchstart', (e) => {
+    if (e.touches && e.touches.length === 1) {
+      touchStartY = e.touches[0].clientY;
+    }
+  }, { passive: true });
+
+  window.addEventListener('touchend', (e) => {
+    if (!e.changedTouches || e.changedTouches.length === 0) return;
+    const scrollY = window.scrollY || window.pageYOffset || 0;
+    const windowHeight = window.innerHeight;
+    const touchEndY = e.changedTouches[0].clientY;
+    const diffY = touchStartY - touchEndY;
+
+    if (Math.abs(diffY) > 40) {
+      if (diffY > 0 && scrollY < 40) {
+        // Swipe para cima (scroll para baixo): faz o fade para Seção 2
+        window.scrollTo({ top: windowHeight, behavior: 'smooth' });
+      } else if (diffY < 0 && scrollY >= windowHeight - 40 && scrollY <= windowHeight + 40) {
+        // Swipe para baixo (scroll para cima): faz o fade de volta para Seção 1
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+  }, { passive: true });
+
+  // Suporte a navegação por teclado (Setas cima e baixo)
+  window.addEventListener('keydown', (e) => {
+    const scrollY = window.scrollY || window.pageYOffset || 0;
+    const windowHeight = window.innerHeight;
+
+    if (scrollY < 40 && (e.key === 'ArrowDown' || e.key === 'PageDown')) {
+      e.preventDefault();
+      window.scrollTo({ top: windowHeight, behavior: 'smooth' });
+    } else if (scrollY >= windowHeight - 40 && scrollY <= windowHeight + 40 && (e.key === 'ArrowUp' || e.key === 'PageUp')) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  });
 }
 
 // NAVEGAÇÃO DE PASSOS
@@ -87,6 +199,11 @@ function goToStep(stepNumber) {
 }
 
 function initNavigation() {
+  const btnStep1Next = document.getElementById('btn-step-1-next');
+  const btnStep2Next = document.getElementById('btn-step-2-next');
+  const finishBtn = document.getElementById('btn-step-3-finish');
+  if (!btnStep1Next || !btnStep2Next || !finishBtn) return;
+
   // Botões de voltar
   document.querySelectorAll('.btn-back').forEach(btn => {
     btn.addEventListener('click', (e) => {
@@ -96,17 +213,16 @@ function initNavigation() {
   });
 
   // Botão Avançar Passo 1 -> Passo 2 (Data e Horário)
-  document.getElementById('btn-step-1-next').addEventListener('click', () => {
+  btnStep1Next.addEventListener('click', () => {
     goToStep(2);
   });
 
   // Botão Avançar Passo 2 -> Passo 3 (Pagamento)
-  document.getElementById('btn-step-2-next').addEventListener('click', () => {
+  btnStep2Next.addEventListener('click', () => {
     goToStep(3);
   });
 
   // Botão Finalizar Pagamento (Passo 3) -> Persiste no Supabase -> Passo 4 (Confirmação)
-  const finishBtn = document.getElementById('btn-step-3-finish');
   finishBtn.addEventListener('click', async () => {
     finishBtn.disabled = true;
     finishBtn.textContent = 'Processando reserva...';
@@ -192,10 +308,13 @@ function initNavigation() {
   });
 
   // Botão Voltar ao Início (Passo 4)
-  document.getElementById('btn-restart').addEventListener('click', () => {
-    resetAll();
-    goToStep(1);
-  });
+  const btnRestart = document.getElementById('btn-restart');
+  if (btnRestart) {
+    btnRestart.addEventListener('click', () => {
+      resetAll();
+      goToStep(1);
+    });
+  }
 }
 
 // PASSO 1: VALIDAÇÃO DOS DADOS PESSOAIS
@@ -204,6 +323,7 @@ function initStep1Validation() {
   const emailInput = document.getElementById('email');
   const cpfInput = document.getElementById('cpf');
   const btnNext = document.getElementById('btn-step-1-next');
+  if (!nameInput || !emailInput || !cpfInput || !btnNext) return;
 
   // Máscara e restrição estrita de 11 números para o CPF
   cpfInput.addEventListener('input', (e) => {
@@ -248,6 +368,7 @@ function initStep1Validation() {
 function initCalendar() {
   const calPrev = document.getElementById('cal-prev');
   const calNext = document.getElementById('cal-next');
+  if (!calPrev || !calNext) return;
 
   // Seleção dos Botões de Horário no Topo
   const timeButtons = document.querySelectorAll('.time-slot-btn');

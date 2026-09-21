@@ -539,13 +539,13 @@ h2 {
   font-family: 'Montserrat', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-/* Header Flutuante Minimalista */
+/* Header Flutuante Fixo Minimalista (Mantém a logo visível em todas as seções) */
 .site-header {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  z-index: 20;
+  z-index: 100;
   background: transparent;
   pointer-events: none;
 }
@@ -717,6 +717,274 @@ h2 {
   object-fit: contain;
   transform: scaleX(-1);
   filter: drop-shadow(0 12px 32px rgba(0, 0, 0, 0.28));
+  animation: fadeInRight 1.3s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
+  will-change: transform, opacity;
+}
+
+/* Palco de Transição Suave em Fade no Scroll entre Seção 1 (Mundo) e Seção 2 (Planeta) */
+.hero-stage {
+  position: relative;
+  width: 100%;
+  height: 200vh; /* Altura de rolagem para o efeito de fade contínuo */
+  background-color: #0d1b13;
+}
+
+.hero-sticky-viewport {
+  position: sticky;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  min-height: 640px;
+  max-height: 1080px;
+  overflow: hidden;
+}
+
+/* Seção 1: MUNDO */
+.hero-slide-mundo {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  opacity: 1;
+  transform-origin: center center;
+  will-change: opacity, transform;
+}
+
+/* Seção 2: PLANETA */
+.hero-slide-planeta {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.97);
+  transform-origin: center center;
+  will-change: opacity, transform;
+}
+
+/* ------------------------------------------------------------------
+ * Estilos da Seção PLANETA (2º Slide - Onça & Rio Amazonas)
+ * ------------------------------------------------------------------ */
+
+.planeta-section {
+  background-color: #d7b07b;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 4% 0 clamp(16px, 2vw, 28px);
+  overflow: hidden;
+}
+
+/* Fundo Ocre Base */
+.planeta-bg-shape {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #d7b07b;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Linhas Decorativas Circulares no Canto Superior Direito */
+.planeta-circles-wrapper {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: clamp(240px, 32vw, 460px);
+  height: clamp(240px, 32vw, 460px);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.planeta-circle-lines {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Faixa Diagonal Clara no Fundo à Esquerda */
+.planeta-accent-diagonal {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #dfb482;
+  clip-path: polygon(0 0, 8.2% 0, 28.5% 100%, 0 68%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Faixa Diagonal com a Foto do Rio Amazonas (vai do Header ao Footer dessa seção) */
+.planeta-river-diagonal {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  clip-path: polygon(8% 0, 41% 0, 61.5% 100%, 28.3% 100%);
+  z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
+  filter: drop-shadow(-8px 0 20px rgba(0, 0, 0, 0.25)) drop-shadow(8px 0 20px rgba(0, 0, 0, 0.25));
+}
+
+.planeta-river-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 28% center;
+  filter: saturate(1.1) contrast(1.05);
+}
+
+/* Onça sobre a Rocha em Primeiro Plano - Cabeça virada para a direita */
+.planeta-jaguar-wrapper {
+  position: absolute;
+  left: -2vw;
+  bottom: 0;
+  height: clamp(380px, 68vh, 730px);
+  max-width: 58vw;
+  display: flex;
+  align-items: flex-end;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.planeta-jaguar-img {
+  height: 100%;
+  width: auto;
+  object-fit: contain;
+  transform: scaleX(-1); /* Inverte horizontalmente: cabeça e olhar voltados para a direita */
+  filter: drop-shadow(0 16px 36px rgba(0, 0, 0, 0.38));
+}
+
+/* Conteúdo Textual à Direita */
+.planeta-content {
+  position: relative;
+  z-index: 2; /* Fica abaixo da onça (z-index 3) para a rocha cobrir o P */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+  max-width: 780px;
+  margin-right: clamp(10px, 2.5vw, 40px);
+}
+
+.planeta-section.is-active .planeta-content {
+  animation: fadeInContent 1s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+}
+
+/* Tagline com tipografia idêntica à referência */
+.planeta-tagline {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: clamp(1rem, 1.45vw, 1.45rem);
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.8px;
+  line-height: 1.22;
+  text-transform: uppercase;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Título PLANETA Extra Grosso e Monumental */
+.planeta-title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: clamp(5.4rem, 12.8vw, 11rem);
+  font-weight: 900;
+  color: #ffffff;
+  line-height: 0.84;
+  letter-spacing: -2px;
+  text-transform: uppercase;
+  margin: 12px 0 32px 0;
+  text-shadow: 0 4px 18px rgba(0, 0, 0, 0.18);
+  white-space: nowrap;
+}
+
+/* Wrapper do Botão */
+.planeta-cta-wrapper {
+  position: relative;
+  z-index: 10;
+}
+
+/* Botão INGRESSOS - Transparente com borda branca */
+.btn-planeta-tickets {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+  color: #ffffff;
+  font-family: 'Montserrat', sans-serif;
+  font-size: clamp(0.95rem, 1.1vw, 1.08rem);
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 13px 48px;
+  border: 2px solid #ffffff;
+  border-radius: 2px;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+
+.btn-planeta-tickets:hover {
+  background-color: #ffffff;
+  color: #c99b67;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+}
+
+.btn-planeta-tickets:active {
+  transform: translateY(0);
+}
+
+
+/* Animações específicas dos elementos da Seção Planeta */
+@keyframes fadeInUpJaguar {
+  from {
+    opacity: 0;
+    transform: translate3d(-30px, 30px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes fadeInRiver {
+  from {
+    opacity: 0;
+    transform: rotate(15deg) translate3d(-40px, -20px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(15deg) translate3d(0, 0, 0);
+  }
+}
+
+@keyframes fadeInContent {
+  from {
+    opacity: 0;
+    transform: translate3d(30px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
 }
 
 /* Seções de Informações mantidas abaixo do Hero */
@@ -776,6 +1044,11 @@ h2 {
     height: 90vh;
     max-width: 72vw;
   }
+  .planeta-jaguar-wrapper {
+    left: -3vw;
+    height: 64vh;
+    max-width: 60vw;
+  }
 }
 
 @media (max-width: 992px) {
@@ -793,6 +1066,17 @@ h2 {
     height: 82vh;
     max-width: 75vw;
     opacity: 0.92;
+  }
+  .planeta-river-diagonal {
+    clip-path: polygon(0 0, 48% 0, 72% 100%, 16% 100%);
+  }
+  .planeta-jaguar-wrapper {
+    left: -4vw;
+    height: 56vh;
+    max-width: 65vw;
+  }
+  .planeta-content {
+    margin-right: 18px;
   }
 }
 
@@ -824,6 +1108,26 @@ h2 {
   .btn-hero-tickets {
     padding: 11px 28px;
   }
+
+  .planeta-section {
+    padding: 0 20px;
+  }
+  .planeta-river-diagonal {
+    clip-path: polygon(0 0, 56% 0, 82% 100%, 10% 100%);
+    opacity: 0.88;
+  }
+  .planeta-jaguar-wrapper {
+    left: -6vw;
+    height: 48vh;
+    max-width: 75vw;
+  }
+  .planeta-title {
+    margin: 6px 0 20px 0;
+  }
+  .btn-planeta-tickets {
+    padding: 11px 32px;
+  }
+
 }
 
 @media (max-width: 480px) {
@@ -838,6 +1142,18 @@ h2 {
     height: 60vh;
     max-width: 95vw;
     opacity: 0.55;
+  }
+  .planeta-river-diagonal {
+    clip-path: polygon(0 0, 68% 0, 94% 100%, 0% 100%);
+    opacity: 0.7;
+  }
+  .planeta-jaguar-wrapper {
+    left: -10vw;
+    height: 42vh;
+    max-width: 85vw;
+  }
+  .planeta-title {
+    font-size: clamp(3.2rem, 14vw, 4.8rem);
   }
 }
 

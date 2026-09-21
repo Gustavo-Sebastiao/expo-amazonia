@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Expo Amazônia - Início</title>
   <link rel="icon" type="image/png" href="assets/icones/amazonia_logo.png">
-  <link rel="stylesheet" href="styles.css?v=4">
+  <link rel="stylesheet" href="styles.css?v=10">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -25,28 +25,75 @@
 
   <!-- Conteúdo Principal do Início -->
   <main class="home-main">
-    <section class="hero-section">
-      <!-- Fundo Desfocado -->
-      <div class="hero-bg" aria-hidden="true"></div>
+    <!-- Palco com Transição em Fade entre Seção 1 (Mundo) e Seção 2 (Planeta) -->
+    <div class="hero-stage" id="heroStage">
+      <div class="hero-sticky-viewport">
+        <!-- Seção 1: MUNDO (Arara) -->
+        <section class="hero-section hero-slide-mundo" id="heroMundo" aria-label="Seção 1: Mundo">
+          <!-- Fundo Desfocado -->
+          <div class="hero-bg" aria-hidden="true"></div>
 
-      <!-- Conteúdo Textual (Camada base de texto) -->
-      <div class="hero-content">
-        <p class="hero-tagline">
-          <span>CONHEÇA UM</span>
-          <span>DOS MAIORES</span>
-          <span>ECOSSISTEMAS DO</span>
-        </p>
-        <h1 class="hero-title">MUNDO</h1>
-        <div class="hero-cta-wrapper">
-          <a href="ingresso.html" class="btn-hero-tickets">INGRESSOS</a>
-        </div>
-      </div>
+          <!-- Conteúdo Textual (Camada base de texto) -->
+          <div class="hero-content">
+            <p class="hero-tagline">
+              <span>CONHEÇA UM</span>
+              <span>DOS MAIORES</span>
+              <span>ECOSSISTEMAS DO</span>
+            </p>
+            <h1 class="hero-title">MUNDO</h1>
+            <div class="hero-cta-wrapper">
+              <a href="ingresso.html" class="btn-hero-tickets">INGRESSOS</a>
+            </div>
+          </div>
 
-      <!-- Arara Posicionada à Direita com a asa sobrepondo a base das letras DO -->
-      <div class="hero-arara-wrapper" aria-hidden="true">
-        <img src="assets/imagens/arara.png?v=2" alt="Arara Amazônica" class="hero-arara-img">
+          <!-- Arara Posicionada à Direita com a asa sobrepondo a base das letras DO -->
+          <div class="hero-arara-wrapper" aria-hidden="true">
+            <img src="assets/imagens/arara.png?v=2" alt="Arara Amazônica" class="hero-arara-img">
+          </div>
+        </section>
+
+        <!-- Seção 2: PLANETA (Onça-Pintada & Rio Amazonas) -->
+        <section class="hero-section planeta-section hero-slide-planeta" id="heroPlaneta" aria-label="Seção 2: Planeta">
+          <!-- Fundo Ocre/Dourado -->
+          <div class="planeta-bg-shape" aria-hidden="true"></div>
+
+          <!-- Faixa Diagonal Clara no Fundo à Esquerda -->
+          <div class="planeta-accent-diagonal" aria-hidden="true"></div>
+
+          <!-- Faixa Diagonal com a Foto do Rio Amazonas (do Header até o Footer) -->
+          <div class="planeta-river-diagonal" aria-hidden="true">
+            <img src="assets/imagens/rio_amazonas.png" alt="Rio Amazonas em meio à floresta tropical" class="planeta-river-img">
+          </div>
+
+          <!-- Linhas Decorativas Circulares no Canto Superior Direito -->
+          <div class="planeta-circles-wrapper" aria-hidden="true">
+            <svg class="planeta-circle-lines" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="400" cy="0" r="215" stroke="rgba(255, 255, 255, 0.72)" stroke-width="2.5" />
+              <circle cx="400" cy="0" r="335" stroke="rgba(255, 255, 255, 0.72)" stroke-width="2.5" />
+            </svg>
+          </div>
+
+          <!-- Onça-Pintada sobre a Rocha em Primeiro Plano -->
+          <div class="planeta-jaguar-wrapper" aria-hidden="true">
+            <img src="assets/imagens/jaguar_rock.png" alt="Onça-pintada sobre rocha" class="planeta-jaguar-img">
+          </div>
+
+          <!-- Conteúdo Textual à Direita -->
+          <div class="planeta-content">
+            <p class="planeta-tagline">
+              <span>A MAIOR FLORESTA</span>
+              <span>TROPICAL DO MUNDO QUE</span>
+              <span>ABRIGA A MAIOR</span>
+              <span>BIODIVERSIDADE DO</span>
+            </p>
+            <h2 class="planeta-title">PLANETA</h2>
+            <div class="planeta-cta-wrapper">
+              <a href="ingresso.html" class="btn-planeta-tickets">INGRESSOS</a>
+            </div>
+          </div>
+        </section>
       </div>
-    </section>
+    </div>
 
     <!-- Seção Conhecer -->
     <section id="conhecer" class="info-section">
@@ -70,6 +117,6 @@
     <p>&copy; 2026 Expo Amazônia. Todos os direitos reservados.</p>
   </footer>
 
-  <script src="script.js" defer></script>
+  <script src="script.js?v=10" defer></script>
 </body>
 </html>
